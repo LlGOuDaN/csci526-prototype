@@ -17,12 +17,21 @@ namespace ClearSky
         [SerializeField] private Transform groundCheck;
         [SerializeField] private LayerMask groundLayer;
 
+        public float maxHealth = 100.0f;
+        public float currentHealth;
+        public float jumpDamageRate = 0.05f;
+        public float runDamageRate = 0.1f;
+
+        public HealthBar healthBar;
+
 
         // Start is called before the first frame update
         void Start()
         {
             rb = GetComponent<Rigidbody2D>();
             anim = GetComponent<Animator>();
+            currentHealth = maxHealth;
+            healthBar.SetMaxHealth(maxHealth);
         }
 
         private void Update()
@@ -69,7 +78,9 @@ namespace ClearSky
                     anim.SetBool("isRun", true);
 
             }
+            Vector3 positionChange = moveVelocity * movePower * Time.deltaTime;
             transform.position += moveVelocity * movePower * Time.deltaTime;
+            TakeDamage(Mathf.Abs(positionChange.x) * runDamageRate);
         }
         void Jump()
         {
@@ -94,7 +105,14 @@ namespace ClearSky
             Vector2 jumpVelocity = new Vector2(0, jumpPower);
             rb.AddForce(jumpVelocity, ForceMode2D.Impulse);
 
+            TakeDamage(jumpDamageRate * maxHealth);
+
             isJumping = false;
+        }
+
+        void TakeDamage(float damage) {
+            currentHealth -= damage;
+            healthBar.SetHealth(currentHealth);
         }
     }
 }
